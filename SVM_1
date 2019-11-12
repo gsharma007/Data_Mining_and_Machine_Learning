@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Nov 12 02:16:01 2019
+
+@author: gauravsharma
+"""
+
+#SVM Classifier on a subset of MNIST digits datasets provided by sklearn library
+#1797 images of handwritten digits(0 to 9)
+#Each digit with 64 features (flattened 8*8 pixels matrix)
+
+from sklearn.datasets import load_digits
+digits = load_digits()
+X,y = digits.data, digits.target
+
+#checking the shape of the dataset
+print(X.shape)
+
+#visualizing the 16th number in the dataset
+print(X[15,:])
+print(X[15,:].reshape(8,8))
+
+import matplotlib.pyplot as plt
+#plt.plot(X,y) 
+#plt.show()
+plt.matshow(X[15,:].reshape(8,8))
+plt.show()
+
+plt.imshow(digits.images[15])
+plt.show()
+
+# =============================================================================
+# #checking class imbalance-way 1- making a dataframe and counting values
+# import pandas as pd
+# df
+# df.x = pd.DataFrame(X)
+# df.y = pd.DataFrame(y)
+# =============================================================================
+
+#checking class imbalance-way 2- plotting y
+plt.hist(y,bins=19)
+plt.show()
+
+## we don not have any class imbalance here o/w we have to do the re-sampling(up-sampling/down-sampling)
+#now checking standardize/normalize? Yes for general case. 
+#But we already has all the data in form of pixels so no issues
+
+#keeping 10% data into test set and then fitting linear SVM on training data
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test =  train_test_split(X,y,test_size=0.1,random_state= 123)
+ 
+#Importing LinearSVC  and 
+from sklearn.svm import LinearSVC
+
+#creating an object of class LinearSVC, here Model is the object
+Model_L = LinearSVC(random_state=123)
+
+#using the "fit" method to fit training data. We use the method "fit" to the object "Model" of class "LinearSVC"
+Model_L.fit(X_train,y_train)
+
+#now using the model to make the prediction on the test data
+y_pred = Model_L.predict(X_test)
+
+#training accuracy checking in linear case
+print("The training accuracy of the LinearSVM is", Model_L.score(X_train,y_train))
+
+#using acccuracy_score method from metrics. Checking the correctness of the prediction
+from sklearn.metrics import accuracy_score
+print("The test accuracy of the LinearSVM by sklearn",accuracy_score(y_test, y_pred))
+
+#import numpy as np
+print("The test accuracy of the LinearSVM by .score", Model_L.score(X_test,y_test))
+
+
+#store the cofficients assigned to all features in the primal problem of the fitted models
+SVM_cofficients = Model_L.coef_
+#print("Cofficients assigned to the models", SVM_cofficients)
+
+# =============================================================================
+# #visualizing the cofficients
+# for i in range(10):
+#     plt.figure()
+#     plt.imshow(SVM_cofficients[i,:].reshape(8,8))
+#     plt.show()
+#     
+# =============================================================================
+    
+#Now implementing a non-linear kernel- RBF Gaussian Kernel
+from sklearn.svm import SVC
+
+Model_NL = SVC(random_state=123)
+Model_NL.fit(X_train,y_train)    
+y_pred_NL = Model_NL.predict(X_test)
+from sklearn.metrics import accuracy_score
+
+#training accuracy will be 100% as we are using the non-linear kernel
+print("The training accuracy of the Non-LinearSVM is", Model_NL.score(X_train,y_train))
+print("The test accuracy of the Non-linearSVM by sklearn",accuracy_score(y_test, y_pred_NL))
+print("The test accuracy of the Non-LinearSVM by .score", Model_NL.score(X_test,y_test))
+
+#Note: It is apparent from training accuracy that we might be overfitting, hence to control complexity we use other arguments in the model such as penalty etc
+#using Gridsearch to find best hyperparameter from the input provided grid of parameters
+
+from sklearn.model_selection import GridSearchCV
+
+Model_NL = SVC(random_state=123)
+svc_grid = GridSearchCV(Model_NL, {'gamma': [0.00001, 0.001, 0.01, 0.1, 1, 10, 100], 'C': [0.01, 0.1, 1, 10, 100, 1000]}, return_train_score = True)
+svc_grid.fit(X_train,y_train)
+svc_best = svc_grid.best_params_  #5 fold on each combination to check
+
+y_pred_NL_PT = svc_grid.predict(X_test)
+
+print("Best parameters for the given case are :", svc_grid.best_params_)
+print("The training accuracy of the Non-LinearSVM is", svc_grid.score(X_train,y_train))
+print("The test accuracy of the Non-linearSVM with parameter_tuning by sklearn",accuracy_score(y_test, y_pred_NL_PT))
+print("The test accuracy of the Non-LinearSVM with parameter_tuning by .score", svc_grid.score(X_test,y_test))
+
+#Note: we using very less gamma. We are making the boundary smoother, making the model simpler
+
+#Now, we can make confusion matrix
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+
+print("Classification Report for tuned parameter case :", classification_report(y_test, y_pred_NL_PT))
+cm = confusion_matrix(y_test, y_pred_NL_PT)
+print("Confusion Matrix for tuned parameter case :", cm)
+ 
+
