@@ -35,8 +35,8 @@ scaler.fit(X)
 Xstd = scaler.transform(X)
 
 
-#modelnow = DecisionTreeClassifier(random_state = 0)
-modelnow = MLPClassifier(hidden_layer_sizes=(10,20), max_iter = 1000)
+modelnow = DecisionTreeClassifier(random_state = 0)
+#modelnow = MLPClassifier(hidden_layer_sizes=(10,20), max_iter = 1000)
 modelnow.fit(Xstd,y)
 
 yhat = modelnow.predict(Xstd)
