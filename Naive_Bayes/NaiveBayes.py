@@ -9,16 +9,16 @@ import numpy as np
 import pandas as pd
 from pandas_ml import ConfusionMatrix
 
-#from sklearn.model_selection import train_test_split 
-#from sklearn import preprocessing
-#from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split 
+from sklearn import preprocessing
+from sklearn.linear_model import LinearRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn import metrics
 from sklearn import model_selection
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-# from sklearn.preprocessing import MinMaxScaler
-# from sklearn.preprocessing import Binarizer
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import Binarizer
 
 bank_data = pd.read_csv('/Users/gauravsharma/Documents/bank-additional-full.csv')
 
